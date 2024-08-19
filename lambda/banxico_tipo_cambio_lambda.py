@@ -4,7 +4,7 @@ import boto3
 from datetime import datetime
 
 def lambda_handler(event, context):
-    #Extrae la fecaha de inicio y fecha fin
+    #Extrae la fecha de inicio y fecha fin
 
     start_date = event.get("start_date", None)
     end_date = event.get("end_date", None)
