@@ -1,17 +1,22 @@
 import json
-import requests
+import requests 
 import boto3
 from datetime import datetime
 
 def lambda_handler(event, context):
-    # Calcula la fecha de termino a paritr de la feche de ejeucccion 
-    end_date = datetime.now().strftime("%Y-%m-%d")
-    
-    # Calcula la fecha de inicio del mes tomando como parametro la fecha de ejecución de la función
-    start_date = datetime.now().replace(day=1).strftime("%Y-%m-%d")
-    
+    #Extrae la fecaha de inicio y fecha fin
+
+    start_date = event.get("start_date", None)
+    end_date = event.get("end_date", None)
+
+    #Si no se proporciona 2 fechas tomara la fecha de ejecucción por default
+    if not start_date:
+        start_date = datetime.now().replace(day=1).strftime("%Y-%m-%d")
+    if not end_date:
+        end_date = datetime.now().strftime("%Y-%m-%d")
+        
     # API endpoint par
-    base_url = "https://www.banxico.org.mx/SieAPIRest/service/v1/series/SF63528"
+    base_url = "https://www.banxico.org.mx/SieAPIRest/service/v1/series"
     series_id = event.get("series_id", "SF63528")
     token = "5a9a46c57fa389aa6f9e3044ed6222169f8f87ceedc621524fe32ad1fee109e2" 
     
@@ -20,7 +25,7 @@ def lambda_handler(event, context):
     s3_key = f"banxico_data/{series_id}_{start_date}_to_{end_date}.json"
 
     # URL para la peticion de infromación
-    url = f"{base_url}/{series_id}/{start_date}/{end_date}"
+    url = f"{base_url}/{series_id}/datos/{start_date}/{end_date}?token={token}"
 
     # Setting headers for the API request
     headers = {
