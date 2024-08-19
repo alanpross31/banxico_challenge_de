@@ -20,36 +20,36 @@ def lambda_handler(event, context):
     series_id = event.get("series_id", "SF63528")
     token = "5a9a46c57fa389aa6f9e3044ed6222169f8f87ceedc621524fe32ad1fee109e2" 
     
-    # S3 b
+    # S3 bucket
     s3_bucket_name = "banxico-tipo-de-cambio-dollar-raw"
     s3_key = f"banxico_data/{series_id}_{start_date}_to_{end_date}.json"
 
     # URL para la peticion de infromación
     url = f"{base_url}/{series_id}/datos/{start_date}/{end_date}?token={token}"
 
-    # Setting headers for the API request
+    # Declaramos el header
     headers = {
         "Bmx-Token": token
     }
 
-    # Making the GET request to the API
+    # Hacemos el request de la información 
     response = requests.get(url, headers=headers)
 
-    # Check if the request was successful
+    # Verifica que el status sea 200 para poder continuar con al extracción
     if response.status_code == 200:
-        # Parsing the JSON response
+        
         data = response.json()
 
-        # Extracting relevant data
+        # Extraemos los datos que necesitamos
         series_data = data.get('bmx', {}).get('series', [])
 
-        # Convert series_data to a JSON string
+        # Convierte la respuesta en un json
         json_data = json.dumps(series_data)
 
-        # Initialize S3 client
+       
         s3 = boto3.client('s3')
 
-        # Upload the JSON data to S3
+        # Subimos la información a nuestro bucket que definimos
         try:
             s3.put_object(
                 Bucket=s3_bucket_name,
@@ -75,7 +75,7 @@ def lambda_handler(event, context):
             }
 
     else:
-        # Handle errors from the API request
+        # Si obtenemos un error los dara el codigo del error
         return {
             'statusCode': response.status_code,
             'body': json.dumps({
